@@ -11,6 +11,8 @@ public func configure(_ app: Application) async throws {
 app.databases.use(DatabaseConfigurationFactory.sqlite(.file("db.sqlite")), as: .sqlite)
 
     app.migrations.add(CreateTodo())
+    app.migrations.add(CreateUser())
+    try await app.autoMigrate()
     // register routes
     try routes(app)
 }
