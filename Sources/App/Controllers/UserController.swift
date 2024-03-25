@@ -3,9 +3,15 @@ import Fluent
 
 struct UserController: RouteCollection {
     func boot(routes: Vapor.RoutesBuilder) throws {
+        
+        // コンテキストごとのrouteをつくれる
+        //let usersRoutes = routes.grouped("api", "users")
+        //usersRoutes.get(":id", use: getSingleHandler)
+        
         routes.post("api", "users", use: createHandler)
         routes.get("api", "users", use: getAllHandler)
         routes.get("api", "users", ":id", use: getSingleHandler)
+        routes.delete("api", "users", ":id",use: deleteHandler)
     }
     
     func createHandler(req: Request) async throws -> User {
@@ -25,5 +31,15 @@ struct UserController: RouteCollection {
         } else {
             throw Abort(.notFound)
         }
+    }
+    
+    func deleteHandler(req: Request) async throws -> HTTPStatus {
+        guard let user = try await User.find(
+            req.parameters.get("id"),
+            on: req.db) else {
+            throw Abort(.notFound)
+        }
+        try await user.delete(on: req.db)
+        return .ok
     }
 }
